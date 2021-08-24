@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  authDB:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    volumes:
+    - mydataauth:/var/lib/mysql
+    networks:
+      - mynetauth
+
+  authentication:
+    image: authentication
+    environment:
+      - DATABASE_URL=authDB
+    ports:
+    - 5000:5000
+    networks:
+      - mynetauth
+
+  authMigration:
+    image: authmigration
+    environment:
+      - DATABASE_URL=authDB
+    networks:
+      - mynetauth
+
+volumes:
+  mydataauth:
+
+networks:
+  mynetauth:
+    driver: overlay
